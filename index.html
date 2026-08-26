@@ -23,15 +23,23 @@
     }
   </script>
 </head>
-<body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased">
+<body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased relative">
 
-  <!-- Toast Notification -->
-  <div id="toastNotification" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-in-out bg-black text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 text-xs sm:text-sm font-medium">
-    <i class="fa-solid fa-circle-check text-green-400"></i>
-    <span id="toastMessage">Tautan berhasil disalin!</span>
+  <!-- MODAL POPUP BAGIKAN (SLIDE UP DARI BAWAH KE TENGAH) -->
+  <div id="shareModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="shareModalContent" class="w-full sm:w-auto sm:min-w-[320px] max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full sm:translate-y-8 transition-transform duration-300 ease-out text-center mx-4 mb-0 sm:mb-0">
+      <div class="w-12 h-12 bg-zinc-100 text-black rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-check text-xl font-bold"></i>
+      </div>
+      <h3 class="font-bold text-base text-black">Link Berhasil Disalin!</h3>
+      <p class="text-xs text-zinc-500 mt-1">Tautan pelacakan sudah siap dibagikan ke teman atau pembeli.</p>
+      <button id="closeModalBtn" class="mt-5 w-full bg-black text-white text-xs font-semibold py-3 rounded-xl hover:bg-zinc-800 transition">
+        Tutup
+      </button>
+    </div>
   </div>
 
-  <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-50">
+  <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-40">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <a href="/" class="flex items-center gap-2">
         <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-lg">1</div>
@@ -104,7 +112,7 @@
           <div class="flex items-center gap-3">
             <button id="shareBtn" title="Salin Tautan Resi" class="p-2.5 bg-white border border-zinc-200 hover:border-black rounded-xl text-zinc-700 hover:text-black transition flex items-center gap-2 text-xs font-semibold">
               <i class="fa-solid fa-share-nodes"></i>
-              <span class="hidden sm:inline">Bagikan</span>
+              <span>Bagikan</span>
             </button>
             <span id="statusBadge" class="inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border"></span>
           </div>
@@ -129,7 +137,7 @@
   <script>
     const RECENT_KEY = 'satutujuan_recent_searches';
 
-    // FUNGSI KONVERSI WAKTU ZONA LOKAL USER
+    // FUNGSI KONVERSI WAKTU ZONA LOKAL USER (WIB / WITA / WIT)
     function parseAndFormatDate(dateStr) {
       if (!dateStr) return '-';
 
@@ -176,7 +184,29 @@
       return cleanStr;
     }
 
-    // MANAJEMEN RIWAYAT PENCAARIAN (LOCALSTORAGE)
+    // POPUP MODAL CONTROL
+    const shareModal = document.getElementById('shareModal');
+    const shareModalContent = document.getElementById('shareModalContent');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function openModal() {
+      shareModal.classList.remove('opacity-0', 'pointer-events-none');
+      shareModalContent.classList.remove('translate-y-full', 'sm:translate-y-8');
+      shareModalContent.classList.add('translate-y-0');
+    }
+
+    function closeModal() {
+      shareModalContent.classList.remove('translate-y-0');
+      shareModalContent.classList.add('translate-y-full', 'sm:translate-y-8');
+      shareModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) closeModal();
+    });
+
+    // LOCALSTORAGE RIWAYAT PENCAARIAN
     function saveToRecent(courier, resi) {
       let recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
       recent = recent.filter(item => !(item.courier === courier && item.resi === resi));
@@ -216,17 +246,6 @@
       renderRecent();
     });
 
-    // TOAST NOTIFICATION
-    function showToast(msg) {
-      const toast = document.getElementById('toastNotification');
-      document.getElementById('toastMessage').innerText = msg;
-      toast.classList.remove('translate-y-[-150%]');
-      setTimeout(() => {
-        toast.classList.add('translate-y-[-150%]');
-      }, 3000);
-    }
-
-    // TULISAN KURIR MAPPER
     function getCourierName(code) {
       const names = {
         jne: 'JNE Express',
@@ -243,7 +262,7 @@
       return names[code.toLowerCase()] || code.toUpperCase();
     }
 
-    // FUNGSI UTAMA CEK RESI
+    // CEK RESI
     async function trackPackage(courier, resi, updateUrl = true) {
       const btnText = document.getElementById('btnTextResi');
       const btnIcon = document.getElementById('btnIconResi');
@@ -320,17 +339,18 @@
         }
       } catch (err) {
         showError('Gagal menghubungkan ke layanan pengiriman. Silakan periksa koneksi internet Anda.');
-      } finally {
+      } font-semibold {
         btnText.innerText = 'Cek Paket';
         btnIcon.className = 'fa-solid fa-arrow-right font-bold';
       }
     }
 
-    // EVENT TOMBOL BAGIKAN
+    // SALIN LINK & TAMPILKAN POPUP
     document.getElementById('shareBtn').addEventListener('click', () => {
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href);
-        showToast('Link pelacakan berhasil disalin!');
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          openModal();
+        });
       }
     });
 
@@ -345,7 +365,7 @@
       }
     });
 
-    // LOAD PERTAMA / DIRECT LINK
+    // LOAD PERTAMA
     window.addEventListener('DOMContentLoaded', () => {
       renderRecent();
 
