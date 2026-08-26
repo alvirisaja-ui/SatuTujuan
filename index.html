@@ -25,6 +25,12 @@
 </head>
 <body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased">
 
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-in-out bg-black text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 text-xs sm:text-sm font-medium">
+    <i class="fa-solid fa-circle-check text-green-400"></i>
+    <span id="toastMessage">Tautan berhasil disalin!</span>
+  </div>
+
   <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <a href="/" class="flex items-center gap-2">
@@ -43,7 +49,7 @@
         <p class="text-zinc-500 text-sm sm:text-base">Masukkan nomor resi dan pilih kurir untuk melihat status paket secara akurat.</p>
       </div>
 
-      <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
+      <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
         <form id="trackingForm" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
@@ -74,21 +80,36 @@
         </form>
       </div>
 
+      <!-- Riwayat Pencarian Terakhir -->
+      <div id="recentSection" class="hidden mb-8">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Pencarian Terakhir</span>
+          <button id="clearHistoryBtn" class="text-xs text-zinc-400 hover:text-red-500 transition">Hapus Riwayat</button>
+        </div>
+        <div id="recentList" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Hasil Pelacakan Paket -->
       <div id="resultResiSection" class="hidden space-y-6">
         <div class="border border-zinc-200 rounded-2xl p-6 bg-zinc-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span id="displayCourier" class="text-xs font-bold uppercase tracking-wider text-zinc-500"></span>
+            <div class="flex items-center gap-2 mb-2">
+              <span id="courierBadge" class="text-xs font-bold uppercase tracking-wider bg-black text-white px-2.5 py-0.5 rounded-md"></span>
               <span class="text-zinc-300">•</span>
               <span id="displayResi" class="text-xs font-mono font-medium text-zinc-700"></span>
             </div>
             <h2 class="text-xl font-bold text-black" id="displayStatusTitle"></h2>
             <p id="displayRoute" class="text-xs text-zinc-500 mt-1"></p>
           </div>
-          <div>
-            <span id="statusBadge" class="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border"></span>
+          <div class="flex items-center gap-3">
+            <button id="shareBtn" title="Salin Tautan Resi" class="p-2.5 bg-white border border-zinc-200 hover:border-black rounded-xl text-zinc-700 hover:text-black transition flex items-center gap-2 text-xs font-semibold">
+              <i class="fa-solid fa-share-nodes"></i>
+              <span class="hidden sm:inline">Bagikan</span>
+            </button>
+            <span id="statusBadge" class="inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border"></span>
           </div>
         </div>
+
         <div class="border border-zinc-200 rounded-2xl p-6 sm:p-8 bg-white">
           <h3 class="font-bold text-lg mb-6 tracking-tight border-b border-zinc-100 pb-4">Riwayat Perjalanan Paket</h3>
           <div id="timelineContainer" class="relative border-l-2 border-zinc-200 ml-4 space-y-8"></div>
@@ -106,7 +127,9 @@
   </footer>
 
   <script>
-    // FUNGSI OTOMATIS MENYESUAIKAN ZONA WAKTU USER (WIB / WITA / WIT)
+    const RECENT_KEY = 'satutujuan_recent_searches';
+
+    // FUNGSI KONVERSI WAKTU ZONA LOKAL USER
     function parseAndFormatDate(dateStr) {
       if (!dateStr) return '-';
 
@@ -153,7 +176,74 @@
       return cleanStr;
     }
 
-    // FUNGSI EKSEKUSI CEK RESI
+    // MANAJEMEN RIWAYAT PENCAARIAN (LOCALSTORAGE)
+    function saveToRecent(courier, resi) {
+      let recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      recent = recent.filter(item => !(item.courier === courier && item.resi === resi));
+      recent.unshift({ courier, resi });
+      if (recent.length > 5) recent.pop();
+      localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+      renderRecent();
+    }
+
+    function renderRecent() {
+      const recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      const container = document.getElementById('recentList');
+      const section = document.getElementById('recentSection');
+
+      if (recent.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      container.innerHTML = '';
+      recent.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-zinc-700 text-xs font-semibold rounded-lg transition flex items-center gap-1.5';
+        btn.innerHTML = `<span class="uppercase text-[10px] bg-zinc-300 text-zinc-800 px-1.5 py-0.5 rounded">${item.courier}</span> ${item.resi}`;
+        btn.onclick = () => {
+          document.getElementById('courierSelect').value = item.courier;
+          document.getElementById('resiInput').value = item.resi;
+          trackPackage(item.courier, item.resi, true);
+        };
+        container.appendChild(btn);
+      });
+      section.classList.remove('hidden');
+    }
+
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      localStorage.removeItem(RECENT_KEY);
+      renderRecent();
+    });
+
+    // TOAST NOTIFICATION
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.remove('translate-y-[-150%]');
+      setTimeout(() => {
+        toast.classList.add('translate-y-[-150%]');
+      }, 3000);
+    }
+
+    // TULISAN KURIR MAPPER
+    function getCourierName(code) {
+      const names = {
+        jne: 'JNE Express',
+        jnt: 'J&T Express',
+        sicepat: 'SiCepat',
+        anteraja: 'Anteraja',
+        pos: 'Pos Indonesia',
+        ninja: 'Ninja Xpress',
+        spx: 'Shopee Xpress',
+        tiki: 'TIKI',
+        lion: 'Lion Parcel',
+        wahana: 'Wahana'
+      };
+      return names[code.toLowerCase()] || code.toUpperCase();
+    }
+
+    // FUNGSI UTAMA CEK RESI
     async function trackPackage(courier, resi, updateUrl = true) {
       const btnText = document.getElementById('btnTextResi');
       const btnIcon = document.getElementById('btnIconResi');
@@ -165,7 +255,6 @@
       errorMessage.classList.add('hidden');
       resultSection.classList.add('hidden');
 
-      // Update URL ke format /kurir/resi tanpa reload halaman
       if (updateUrl) {
         history.pushState({ courier, resi }, '', `/${courier}/${resi}`);
       }
@@ -180,7 +269,7 @@
           const historyData = data.history || [];
 
           document.getElementById('displayResi').innerText = summary.awb || resi;
-          document.getElementById('displayCourier').innerText = summary.courier || courier;
+          document.getElementById('courierBadge').innerText = getCourierName(summary.courier || courier);
           document.getElementById('displayRoute').innerText = `Pengirim: ${summary.origin || '-'} ➔ Penerima: ${summary.destination || '-'}`;
 
           const statusText = (summary.status || '').toLowerCase();
@@ -190,11 +279,11 @@
           const statusTitle = document.getElementById('displayStatusTitle');
           
           if (isDelivered) {
-            badge.className = "inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border bg-black text-white border-black";
+            badge.className = "inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border bg-black text-white border-black";
             badge.innerText = "DELIVERED";
             statusTitle.innerText = "Paket Telah Diterima";
           } else {
-            badge.className = "inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border border-zinc-300 bg-zinc-100 text-zinc-800";
+            badge.className = "inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border border-zinc-300 bg-zinc-100 text-zinc-800";
             badge.innerText = (summary.status || 'PROSES').toUpperCase();
             statusTitle.innerText = "Paket Dalam Perjalanan";
           }
@@ -223,6 +312,7 @@
             timeline.innerHTML = '<p class="text-xs text-zinc-400">Belum ada riwayat perjalanan rinci.</p>';
           }
 
+          saveToRecent(courier, resi);
           resultSection.classList.remove('hidden');
           resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
@@ -236,7 +326,15 @@
       }
     }
 
-    // Submit Form Event
+    // EVENT TOMBOL BAGIKAN
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Link pelacakan berhasil disalin!');
+      }
+    });
+
+    // SUBMIT FORM
     document.getElementById('trackingForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const resi = document.getElementById('resiInput').value.trim();
@@ -247,8 +345,10 @@
       }
     });
 
-    // Otomatis Cek Resi Saat Buka Direct Link (misal: satutujuan.vercel.app/jnt/123456)
+    // LOAD PERTAMA / DIRECT LINK
     window.addEventListener('DOMContentLoaded', () => {
+      renderRecent();
+
       const pathSegments = window.location.pathname.split('/').filter(Boolean);
       
       if (pathSegments.length >= 2) {
@@ -266,7 +366,7 @@
       }
     });
 
-    // Navigasi Tombol Back/Forward Browser
+    // BACK/FORWARD BROWSER
     window.addEventListener('popstate', (e) => {
       if (e.state && e.state.courier && e.state.resi) {
         document.getElementById('courierSelect').value = e.state.courier;
