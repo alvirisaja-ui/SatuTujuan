@@ -27,10 +27,10 @@
 
   <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
-      <div class="flex items-center gap-2">
+      <a href="/" class="flex items-center gap-2">
         <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-lg">1</div>
         <span class="text-xl font-bold tracking-tight text-black">SatuTujuan</span>
-      </div>
+      </a>
       <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full">Lacak Paket</span>
     </div>
   </header>
@@ -122,10 +122,8 @@
         let h = parseInt(hour, 10);
         let m = parseInt(minute, 10);
 
-        // Objek tanggal UTC murni dari API
         const utcDate = new Date(Date.UTC(y, mon, d, h, m));
 
-        // Format waktu otomatis mengikuti perangkat user
         const formatter = new Intl.DateTimeFormat('id-ID', {
           day: 'numeric',
           month: 'short',
@@ -139,7 +137,6 @@
         const dateMap = {};
         parts.forEach(p => { dateMap[p.type] = p.value; });
 
-        // Deteksi zona waktu pengguna (WIB / WITA / WIT)
         const timeZoneOffset = -new Date().getTimezoneOffset() / 60;
         let tzLabel = 'WIB';
         if (timeZoneOffset === 8) {
@@ -156,10 +153,8 @@
       return cleanStr;
     }
 
-    document.getElementById('trackingForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const resi = document.getElementById('resiInput').value.trim();
-      const courier = document.getElementById('courierSelect').value;
+    // FUNGSI EKSEKUSI CEK RESI
+    async function trackPackage(courier, resi, updateUrl = true) {
       const btnText = document.getElementById('btnTextResi');
       const btnIcon = document.getElementById('btnIconResi');
       const resultSection = document.getElementById('resultResiSection');
@@ -170,6 +165,11 @@
       errorMessage.classList.add('hidden');
       resultSection.classList.add('hidden');
 
+      // Update URL ke format /kurir/resi tanpa reload halaman
+      if (updateUrl) {
+        history.pushState({ courier, resi }, '', `/${courier}/${resi}`);
+      }
+
       try {
         const response = await fetch(`/api/track?courier=${courier}&awb=${resi}`);
         const result = await response.json();
@@ -177,7 +177,7 @@
         if (result.status === 200 && result.data) {
           const data = result.data;
           const summary = data.summary || {};
-          const history = data.history || [];
+          const historyData = data.history || [];
 
           document.getElementById('displayResi').innerText = summary.awb || resi;
           document.getElementById('displayCourier').innerText = summary.courier || courier;
@@ -202,8 +202,8 @@
           const timeline = document.getElementById('timelineContainer');
           timeline.innerHTML = '';
 
-          if (history.length > 0) {
-            history.forEach((item, index) => {
+          if (historyData.length > 0) {
+            historyData.forEach((item, index) => {
               const isLatest = index === 0;
               const dotClass = isLatest ? 'bg-black ring-4 ring-white' : 'bg-zinc-300 ring-4 ring-white';
               const iconClass = isLatest ? (isDelivered ? 'fa-check' : 'fa-truck') : '';
@@ -233,6 +233,45 @@
       } finally {
         btnText.innerText = 'Cek Paket';
         btnIcon.className = 'fa-solid fa-arrow-right font-bold';
+      }
+    }
+
+    // Submit Form Event
+    document.getElementById('trackingForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const resi = document.getElementById('resiInput').value.trim();
+      const courier = document.getElementById('courierSelect').value;
+
+      if (courier && resi) {
+        trackPackage(courier, resi, true);
+      }
+    });
+
+    // Otomatis Cek Resi Saat Buka Direct Link (misal: satutujuan.vercel.app/jnt/123456)
+    window.addEventListener('DOMContentLoaded', () => {
+      const pathSegments = window.location.pathname.split('/').filter(Boolean);
+      
+      if (pathSegments.length >= 2) {
+        const courier = pathSegments[0].toLowerCase();
+        const resi = pathSegments[1];
+
+        const selectEl = document.getElementById('courierSelect');
+        const inputEl = document.getElementById('resiInput');
+
+        if (selectEl && inputEl) {
+          selectEl.value = courier;
+          inputEl.value = resi;
+          trackPackage(courier, resi, false);
+        }
+      }
+    });
+
+    // Navigasi Tombol Back/Forward Browser
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.courier && e.state.resi) {
+        document.getElementById('courierSelect').value = e.state.courier;
+        document.getElementById('resiInput').value = e.state.resi;
+        trackPackage(e.state.courier, e.state.resi, false);
       }
     });
 
