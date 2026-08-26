@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SatuTujuan - Cek Resi Paket Indonesia</title>
   
-  <!-- Font Montserrat & FontAwesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -27,7 +25,6 @@
 </head>
 <body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased">
 
-  <!-- Header -->
   <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <div class="flex items-center gap-2">
@@ -38,16 +35,12 @@
     </div>
   </header>
 
-  <!-- Main Content -->
   <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-10">
-    
-    <!-- Hero Title -->
     <div class="text-center mb-8">
       <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Lacak Pengiriman Anda</h1>
       <p class="text-zinc-500 text-sm sm:text-base">Masukkan nomor resi dan pilih kurir untuk melihat status paket secara akurat.</p>
     </div>
 
-    <!-- Trust Badges -->
     <div class="grid grid-cols-3 gap-3 max-w-2xl mx-auto mb-8 text-center border-y border-zinc-100 py-4">
       <div>
         <div class="text-lg sm:text-xl font-bold text-black">1.000.000+</div>
@@ -63,11 +56,9 @@
       </div>
     </div>
 
-    <!-- Form Input -->
     <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
       <form id="trackingForm" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
           <div class="md:col-span-2">
             <label for="resiInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Nomor Resi</label>
             <input 
@@ -99,7 +90,6 @@
               <option value="wahana">Wahana</option>
             </select>
           </div>
-
         </div>
 
         <button 
@@ -113,14 +103,10 @@
       </form>
     </div>
 
-    <!-- Error State -->
     <div id="errorMessage" class="hidden mb-6 p-4 bg-zinc-50 border border-zinc-300 text-zinc-700 rounded-xl text-xs sm:text-sm text-center font-medium">
     </div>
 
-    <!-- Results Section -->
     <div id="resultSection" class="hidden space-y-6">
-      
-      <!-- Summary Card -->
       <div class="border border-zinc-200 rounded-2xl p-6 bg-zinc-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
@@ -137,19 +123,13 @@
         </div>
       </div>
 
-      <!-- History Timeline -->
       <div class="border border-zinc-200 rounded-2xl p-6 sm:p-8 bg-white">
         <h3 class="font-bold text-lg mb-6 tracking-tight border-b border-zinc-100 pb-4">Riwayat Perjalanan Paket</h3>
-        
-        <div id="timelineContainer" class="relative border-l-2 border-zinc-200 ml-4 space-y-8">
-        </div>
+        <div id="timelineContainer" class="relative border-l-2 border-zinc-200 ml-4 space-y-8"></div>
       </div>
-
     </div>
-
   </main>
 
-  <!-- Footer -->
   <footer class="border-t border-zinc-200 py-6 bg-white text-center text-xs text-zinc-400">
     <div class="max-w-4xl mx-auto px-4">
       &copy; 2026 <span class="font-semibold text-zinc-700">SatuTujuan</span>. Seluruh hak cipta dilindungi.
@@ -157,8 +137,6 @@
   </footer>
 
   <script>
-    const API_KEY = 'sk_92yy1bvow5volp01dnvgispn6kcdrdepvhwbadydurjofbyhhlwy8gwetqusryo1';
-
     document.getElementById('trackingForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -178,13 +156,10 @@
       resultSection.classList.add('hidden');
 
       try {
-        // Tembak langsung ke API Binderbyte tanpa Proxy
-        const apiUrl = `https://api.binderbyte.com/v1/track?api_key=${API_KEY}&courier=${courier}&awb=${resi}`;
-
-        const response = await fetch(apiUrl);
+        // Tembak ke endpoint internal serverless proxy di Vercel
+        const response = await fetch(`/api/track?courier=${courier}&awb=${resi}`);
         const result = await response.json();
 
-        // 200 artinya API Binderbyte berhasil menemukan data resi
         if (result.status === 200 && result.data) {
           const data = result.data;
           const summary = data.summary || {};
@@ -239,8 +214,7 @@
           resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         } else {
-          // Jika Binderbyte mengembalikan pesan kesalahan (resinya emang salah/tidak terdeteksi)
-          showError(result.message || 'Nomor resi tidak ditemukan. Mohon periksa kembali nomor resi dan pilihan kurir Anda.');
+          showError('Nomor resi tidak ditemukan. Mohon periksa kembali nomor resi dan pilihan kurir Anda.');
         }
 
       } catch (err) {
