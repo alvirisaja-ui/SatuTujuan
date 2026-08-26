@@ -266,28 +266,43 @@
       if (e.target === shareModal) closeModal();
     });
 
-    // MODAL FAQ / BANTUAN CONTROL
+    // MODAL FAQ / BANTUAN CONTROL WITH ROUTING (/pusat-bantuan)
     const faqModal = document.getElementById('faqModal');
     const faqModalContent = document.getElementById('faqModalContent');
     const openFaqBtn = document.getElementById('openFaqBtn');
     const closeFaqBtn = document.getElementById('closeFaqBtn');
     const searchFaq = document.getElementById('searchFaq');
 
-    openFaqBtn.addEventListener('click', () => {
+    let previousUrl = window.location.pathname;
+
+    function showFaqModal() {
       faqModal.classList.remove('opacity-0', 'pointer-events-none');
       faqModalContent.classList.remove('scale-95');
       faqModalContent.classList.add('scale-100');
-    });
+    }
 
-    function closeFaq() {
+    function openFaq(updateUrl = true) {
+      if (updateUrl && window.location.pathname !== '/pusat-bantuan') {
+        previousUrl = window.location.pathname;
+        history.pushState({ page: 'faq' }, '', '/pusat-bantuan');
+      }
+      showFaqModal();
+    }
+
+    function closeFaq(updateUrl = true) {
       faqModalContent.classList.remove('scale-100');
       faqModalContent.classList.add('scale-95');
       faqModal.classList.add('opacity-0', 'pointer-events-none');
+
+      if (updateUrl && window.location.pathname === '/pusat-bantuan') {
+        history.pushState(null, '', previousUrl === '/pusat-bantuan' ? '/' : previousUrl);
+      }
     }
 
-    closeFaqBtn.addEventListener('click', closeFaq);
+    openFaqBtn.addEventListener('click', () => openFaq(true));
+    closeFaqBtn.addEventListener('click', () => closeFaq(true));
     faqModal.addEventListener('click', (e) => {
-      if (e.target === faqModal) closeFaq();
+      if (e.target === faqModal) closeFaq(true);
     });
 
     // PENCARIAN DI FAQ
@@ -374,6 +389,7 @@
 
       if (updateUrl) {
         history.pushState({ courier, resi }, '', `/${courier}/${resi}`);
+        previousUrl = `/${courier}/${resi}`;
       }
 
       try {
@@ -463,12 +479,18 @@
       }
     });
 
-    // LOAD PERTAMA
+    // LOAD PERTAMA SINKRONISASI ROUTE
     window.addEventListener('DOMContentLoaded', () => {
       renderRecent();
 
-      const pathSegments = window.location.pathname.split('/').filter(Boolean);
-      
+      const currentPath = window.location.pathname;
+
+      if (currentPath === '/pusat-bantuan') {
+        showFaqModal();
+        return;
+      }
+
+      const pathSegments = currentPath.split('/').filter(Boolean);
       if (pathSegments.length >= 2) {
         const courier = pathSegments[0].toLowerCase();
         const resi = pathSegments[1];
@@ -484,12 +506,20 @@
       }
     });
 
-    // BACK/FORWARD BROWSER
+    // BACK/FORWARD BROWSER NAVIGATION
     window.addEventListener('popstate', (e) => {
-      if (e.state && e.state.courier && e.state.resi) {
-        document.getElementById('courierSelect').value = e.state.courier;
-        document.getElementById('resiInput').value = e.state.resi;
-        trackPackage(e.state.courier, e.state.resi, false);
+      const currentPath = window.location.pathname;
+
+      if (currentPath === '/pusat-bantuan') {
+        showFaqModal();
+      } else {
+        closeFaq(false);
+
+        if (e.state && e.state.courier && e.state.resi) {
+          document.getElementById('courierSelect').value = e.state.courier;
+          document.getElementById('resiInput').value = e.state.resi;
+          trackPackage(e.state.courier, e.state.resi, false);
+        }
       }
     });
 
