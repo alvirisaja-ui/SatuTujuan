@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SatuTujuan - Cek Resi Paket Indonesia</title>
+  
+  <!-- Font Montserrat & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Header -->
+  <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-lg">1</div>
+        <span class="text-xl font-bold tracking-tight text-black">SatuTujuan</span>
+      </div>
+      <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full">Lacak Resi</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-10">
+    
+    <!-- Hero Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Lacak Pengiriman Anda</h1>
+      <p class="text-zinc-500 text-sm sm:text-base">Masukkan nomor resi dan pilih kurir untuk melihat status paket secara akurat.</p>
+    </div>
+
+    <!-- Trust Badges / Social Proof -->
+    <div class="grid grid-cols-3 gap-3 max-w-2xl mx-auto mb-8 text-center border-y border-zinc-100 py-4">
+      <div>
+        <div class="text-lg sm:text-xl font-bold text-black">1.000.000+</div>
+        <div class="text-[10px] sm:text-xs text-zinc-400 font-medium uppercase tracking-wider">Paket Terlacak</div>
+      </div>
+      <div class="border-x border-zinc-100">
+        <div class="text-lg sm:text-xl font-bold text-black">10+ Ekspedisi</div>
+        <div class="text-[10px] sm:text-xs text-zinc-400 font-medium uppercase tracking-wider">Terintegrasi</div>
+      </div>
+      <div>
+        <div class="text-lg sm:text-xl font-bold text-black">99.9%</div>
+        <div class="text-[10px] sm:text-xs text-zinc-400 font-medium uppercase tracking-wider">Akurat & Cepat</div>
+      </div>
+    </div>
+
+    <!-- Form Input -->
+    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
+      <form id="trackingForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <div class="md:col-span-2">
+            <label for="resiInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Nomor Resi</label>
+            <input 
+              type="text" 
+              id="resiInput" 
+              placeholder="Contoh: JNT123456789" 
+              required
+              class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition"
+            >
+          </div>
+
+          <div>
+            <label for="courierSelect" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kurir / Ekspedisi</label>
+            <select 
+              id="courierSelect" 
+              required
+              class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition"
+            >
+              <option value="" disabled selected>Pilih Kurir</option>
+              <option value="jne">JNE Express</option>
+              <option value="jnt">J&T Express</option>
+              <option value="sicepat">SiCepat</option>
+              <option value="anteraja">Anteraja</option>
+              <option value="pos">Pos Indonesia</option>
+              <option value="ninja">Ninja Xpress</option>
+              <option value="spx">Shopee Xpress (SPX)</option>
+              <option value="tiki">TIKI</option>
+              <option value="lion">Lion Parcel</option>
+              <option value="wahana">Wahana</option>
+            </select>
+          </div>
+
+        </div>
+
+        <button 
+          type="submit" 
+          id="btnSubmit"
+          class="w-full mt-2 bg-black hover:bg-zinc-800 text-white font-semibold py-4 rounded-xl transition flex items-center justify-center gap-2"
+        >
+          <span id="btnText">Cek Paket</span>
+          <i id="btnIcon" class="fa-solid fa-arrow-right font-bold"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Pesan Kesalahan Terpisah (User Friendly) -->
+    <div id="errorMessage" class="hidden mb-6 p-4 bg-zinc-50 border border-zinc-300 text-zinc-700 rounded-xl text-xs sm:text-sm text-center font-medium">
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultSection" class="hidden space-y-6">
+      
+      <!-- Summary Card -->
+      <div class="border border-zinc-200 rounded-2xl p-6 bg-zinc-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="displayCourier" class="text-xs font-bold uppercase tracking-wider text-zinc-500"></span>
+            <span class="text-zinc-300">•</span>
+            <span id="displayResi" class="text-xs font-mono font-medium text-zinc-700"></span>
+          </div>
+          <h2 class="text-xl font-bold text-black" id="displayStatusTitle"></h2>
+          <p id="displayRoute" class="text-xs text-zinc-500 mt-1"></p>
+        </div>
+        
+        <div>
+          <span id="statusBadge" class="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border"></span>
+        </div>
+      </div>
+
+      <!-- History Timeline -->
+      <div class="border border-zinc-200 rounded-2xl p-6 sm:p-8 bg-white">
+        <h3 class="font-bold text-lg mb-6 tracking-tight border-b border-zinc-100 pb-4">Riwayat Perjalanan Paket</h3>
+        
+        <div id="timelineContainer" class="relative border-l-2 border-zinc-200 ml-4 space-y-8">
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-zinc-200 py-6 bg-white text-center text-xs text-zinc-400">
+    <div class="max-w-4xl mx-auto px-4">
+      &copy; 2026 <span class="font-semibold text-zinc-700">SatuTujuan</span>. Seluruh hak cipta dilindungi.
+    </div>
+  </footer>
+
+  <script>
+    const API_KEY = 'sk_92yy1bvow5volp01dnvgispn6kcdrdepvhwbadydurjofbyhhlwy8gwetqusryo1';
+
+    document.getElementById('trackingForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const resi = document.getElementById('resiInput').value.trim();
+      const courier = document.getElementById('courierSelect').value;
+      
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+      const resultSection = document.getElementById('resultSection');
+      const errorMessage = document.getElementById('errorMessage');
+
+      if (!resi || !courier) return;
+
+      btnText.innerText = 'Memeriksa Paket...';
+      btnIcon.className = 'fa-solid fa-spinner fa-spin';
+      errorMessage.classList.add('hidden');
+      resultSection.classList.add('hidden');
+
+      try {
+        const directApiUrl = `https://api.binderbyte.com/v1/track?api_key=${API_KEY}&courier=${courier}&awb=${resi}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(directApiUrl)}`;
+
+        const response = await fetch(proxyUrl);
+        const result = await response.json();
+
+        if (result.status === 200) {
+          const data = result.data;
+          const summary = data.summary;
+          const history = data.history;
+
+          document.getElementById('displayResi').innerText = summary.awb;
+          document.getElementById('displayCourier').innerText = summary.courier;
+          document.getElementById('displayRoute').innerText = `Pengirim: ${summary.origin || '-'} ➔ Penerima: ${summary.destination || '-'}`;
+
+          const isDelivered = summary.status.toLowerCase().includes('delivered') || summary.status.toLowerCase().includes('diterima');
+          
+          const badge = document.getElementById('statusBadge');
+          const statusTitle = document.getElementById('displayStatusTitle');
+          
+          if (isDelivered) {
+            badge.className = "inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border bg-black text-white border-black";
+            badge.innerText = "DELIVERED";
+            statusTitle.innerText = "Paket Telah Diterima";
+          } else {
+            badge.className = "inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border border-zinc-300 bg-zinc-100 text-zinc-800";
+            badge.innerText = summary.status.toUpperCase();
+            statusTitle.innerText = "Paket Dalam Perjalanan";
+          }
+
+          const timeline = document.getElementById('timelineContainer');
+          timeline.innerHTML = '';
+
+          history.forEach((item, index) => {
+            const isLatest = index === 0;
+            const dotClass = isLatest ? 'bg-black ring-4 ring-white' : 'bg-zinc-300 ring-4 ring-white';
+            const iconClass = isLatest ? (isDelivered ? 'fa-check' : 'fa-truck') : '';
+            
+            const timelineItem = `
+              <div class="mb-8 ml-6">
+                <span class="absolute -left-2.5 flex items-center justify-center w-5 h-5 ${dotClass} rounded-full">
+                  ${iconClass ? `<i class="fa-solid ${iconClass} text-[9px] text-white"></i>` : ''}
+                </span>
+                <time class="block mb-1 text-xs font-medium text-zinc-400">${item.date}</time>
+                <h4 class="text-sm ${isLatest ? 'font-bold text-black' : 'font-semibold text-zinc-800'}">${item.desc}</h4>
+                <p class="text-xs text-zinc-500 mt-1">Lokasi: ${item.location || 'Sistem Hub'}</p>
+              </div>
+            `;
+            timeline.innerHTML += timelineItem;
+          });
+
+          resultSection.classList.remove('hidden');
+          resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } else {
+          showError('Nomor resi tidak ditemukan. Mohon periksa kembali nomor resi dan pilihan kurir Anda.');
+        }
+
+      } catch (err) {
+        showError('Maaf, sistem sedang memproses terlalu banyak permintaan. Silakan coba beberapa saat lagi.');
+      } finally {
+        btnText.innerText = 'Cek Paket';
+        btnIcon.className = 'fa-solid fa-arrow-right font-bold';
+      }
+    });
+
+    function showError(msg) {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.innerText = msg;
+      errorMessage.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
