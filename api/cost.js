@@ -7,32 +7,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Cari kode kecamatan asal & tujuan
-    const [resOrigin, resDest] = await Promise.all([
-      fetch(`https://api.binderbyte.com/v1/list/district?api_key=${API_KEY}&query=${encodeURIComponent(origin)}`),
-      fetch(`https://api.binderbyte.com/v1/list/district?api_key=${API_KEY}&query=${encodeURIComponent(destination)}`)
-    ]);
-
-    const dataOrigin = await resOrigin.json();
-    const dataDest = await resDest.json();
-
-    if (!dataOrigin.data || dataOrigin.data.length === 0) {
-      return res.status(404).json({ status: 404, message: `Kecamatan/Kota asal "${origin}" tidak ditemukan. Coba nama kecamatan.` });
-    }
-    if (!dataDest.data || dataDest.data.length === 0) {
-      return res.status(404).json({ status: 404, message: `Kecamatan/Kota tujuan "${destination}" tidak ditemukan. Coba nama kecamatan.` });
+    // Fungsi pencari ID kecamatan ke API Binderbyte
+    async function getDistrictId(cityName) {
+      const response = await fetch(`https://api.binderbyte.com/v1/list/district?api_key=${API_KEY}&query=${encodeURIComponent(cityName)}`);
+      const result = await response.json();
+      
+      if (result.status === 200 && result.data && result.data.length > 0) {
+        return result.data[0].id;
+      }
+      return null;
     }
 
-    // Ambil ID kecamatan pertama yang cocok
-    const originId = dataOrigin.data[0].id;
-    const destinationId = dataDest.data[0].id;
+    const originId = await getDistrictId(origin);
+    const destinationId = await getDistrictId(destination);
 
-    // 2. Hitung ongkir menggunakan ID kecamatan
+    if (!originId) {
+      return res.status(404).json({ status: 404, message: `Kecamatan asal "${origin}" tidak ditemukan. Gunakan nama kecamatan spesifik (Contoh: Coblong, Kebayoran Baru, Tebet).` });
+    }
+    if (!destinationId) {
+      return res.status(404).json({ status: 404, message: `Kecamatan tujuan "${destination}" tidak ditemukan. Gunakan nama kecamatan spesifik (Contoh: Coblong, Kebayoran Baru, Tebet).` });
+    }
+
     const courierParam = courier || 'jne,jnt,sicepat,anteraja,pos,tiki,wahana,lion,ninja';
-    const response = await fetch(`https://api.binderbyte.com/v1/cost?api_key=${API_KEY}&origin=${originId}&destination=${destinationId}&weight=${weight}&courier=${courierParam}`);
-    const data = await response.json();
+    const costResponse = await fetch(`https://api.binderbyte.com/v1/cost?api_key=${API_KEY}&origin=${originId}&destination=${destinationId}&weight=${weight}&courier=${courierParam}`);
+    const costData = await costResponse.json();
     
-    return res.status(200).json(data);
+    return res.status(200).json(costData);
+
   } catch (error) {
     return res.status(500).json({ status: 500, message: 'Gagal menghubungkan ke layanan pengiriman.' });
   }
