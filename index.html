@@ -107,28 +107,35 @@
   </footer>
 
   <script>
-    // FUNGSI MEMASTIKAN JAM PERSIS SESUAI DATA API BINDERBYTE
+    // PERBAIKAN FORMAT TANGGAL & JAM MENTAH DARI BINDERBYTE
     function formatIndonesianDate(dateStr) {
       if (!dateStr) return '-';
 
-      // 1. Bersihkan string dari spasi berlebih
-      const cleanStr = dateStr.trim();
+      const str = String(dateStr).trim();
+      
+      // Ambil pola Jam & Menit (HH:mm) secara spesifik menggunakan Regex
+      const timeMatch = str.match(/(\d{2}):(\d{2})/);
+      const timePart = timeMatch ? `${timeMatch[1]}:${timeMatch[2]} WIB` : '';
 
-      // 2. Pisahkan angka Tanggal-Bulan-Tahun dan Jam:Menit tanpa lewat objek JavaScript Date (Mencegah pergeseran timezone)
-      const parts = cleanStr.split(/[\s\-:]+/);
+      // Ambil angka tahun (4 digit), bulan (2 digit), tanggal (2 digit)
+      const dateMatch = str.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/) || str.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
 
-      // Jika format dari API berupa "YYYY-MM-DD HH:mm:ss"
-      if (parts.length >= 5) {
-        const [year, month, day, hour, minute] = parts;
+      if (dateMatch) {
+        let year, month, day;
+        if (dateMatch[1].length === 4) {
+          [, year, month, day] = dateMatch;
+        } else {
+          [, day, month, year] = dateMatch;
+        }
+
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
         const monthLabel = monthNames[parseInt(month, 10) - 1] || month;
 
-        // Ambil nilai mentah Jam & Menit dari Binderbyte langsung
-        return `${day} ${monthLabel} ${year}, ${hour}:${minute} WIB`;
+        return `${parseInt(day, 10)} ${monthLabel} ${year}${timePart ? ', ' + timePart : ''}`;
       }
 
-      // Jika format berupa string teks langsung
-      return cleanStr;
+      // Jika format dari API berupa string tanggal biasa, tampilkan langsung tanpa ubah jamnya
+      return str;
     }
 
     // Cek Resi Form Handler
