@@ -5,8 +5,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ status: 400, message: 'Parameter courier dan awb wajib diisi.' });
   }
 
-  // Masukkan API Key Binderbyte Kamu di sini
-  const API_KEY = process.env.BINDERBYTE_API_KEY || 'MASUKKAN_API_KEY_KAMU_DI_SINI';
+  // API Key Binderbyte kamu
+  const API_KEY = 'sk_92yy1bvow5volp01dnvgispn6kcdrdepvhwbadydurjofbyhhlwy8gwetqusryo1';
 
   try {
     const response = await fetch(
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     );
     const data = await response.json();
 
-    // Kirim data MENTAH langsung ke frontend tanpa diubah/diolah tanggalnya sama sekali
+    // Kirim data mentah langsung dari Binderbyte ke frontend tanpa diubah tanggal/jamnya
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ status: 500, message: 'Gagal mengambil data dari server.' });
