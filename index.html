@@ -25,7 +25,7 @@
 </head>
 <body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased relative">
 
-  <!-- MODAL POPUP BAGIKAN (SLIDE UP DARI BAWAH KE TENGAH) -->
+  <!-- MODAL POPUP BAGIKAN -->
   <div id="shareModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300">
     <div id="shareModalContent" class="w-full sm:w-auto sm:min-w-[320px] max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full sm:translate-y-8 transition-transform duration-300 ease-out text-center mx-4 mb-0 sm:mb-0">
       <div class="w-12 h-12 bg-zinc-100 text-black rounded-full flex items-center justify-center mx-auto mb-3">
@@ -206,7 +206,7 @@
       if (e.target === shareModal) closeModal();
     });
 
-    // LOCALSTORAGE RIWAYAT PENCAARIAN
+    // LOCALSTORAGE RIWAYAT PENCARIAN
     function saveToRecent(courier, resi) {
       let recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
       recent = recent.filter(item => !(item.courier === courier && item.resi === resi));
@@ -339,7 +339,7 @@
         }
       } catch (err) {
         showError('Gagal menghubungkan ke layanan pengiriman. Silakan periksa koneksi internet Anda.');
-      } font-semibold {
+      } finally {
         btnText.innerText = 'Cek Paket';
         btnIcon.className = 'fa-solid fa-arrow-right font-bold';
       }
