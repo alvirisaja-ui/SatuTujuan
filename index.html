@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SatuTujuan - Cek Resi & Ongkir Paket Indonesia</title>
+  <title>SatuTujuan - Cek Resi Paket Indonesia</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,24 +31,12 @@
         <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-lg">1</div>
         <span class="text-xl font-bold tracking-tight text-black">SatuTujuan</span>
       </div>
-      <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full">Layanan Logistik</span>
+      <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full">Lacak Paket</span>
     </div>
   </header>
 
   <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-10">
     
-    <!-- Tab Navigation -->
-    <div class="flex justify-center mb-8">
-      <div class="bg-zinc-100 p-1 rounded-xl flex gap-1 border border-zinc-200">
-        <button id="tabResi" onclick="switchTab('resi')" class="px-6 py-2.5 rounded-lg text-sm font-bold transition bg-white text-black shadow-sm">
-          <i class="fa-solid fa-magnifying-glass mr-2"></i>Cek Resi
-        </button>
-        <button id="tabOngkir" onclick="switchTab('ongkir')" class="px-6 py-2.5 rounded-lg text-sm font-bold transition text-zinc-500 hover:text-black">
-          <i class="fa-solid fa-calculator mr-2"></i>Cek Ongkir
-        </button>
-      </div>
-    </div>
-
     <!-- Section Cek Resi -->
     <div id="sectionResi">
       <div class="text-center mb-8">
@@ -109,42 +97,6 @@
       </div>
     </div>
 
-    <!-- Section Cek Ongkir -->
-    <div id="sectionOngkir" class="hidden">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Hitung Ongkos Kirim</h1>
-        <p class="text-zinc-500 text-sm sm:text-base">Bandingkan tarif pengiriman dari berbagai ekspedisi secara cepat.</p>
-      </div>
-
-      <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
-        <form id="ongkirForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label for="originInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan Asal</label>
-              <input type="text" id="originInput" placeholder="Contoh: Coblong" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
-            </div>
-            <div>
-              <label for="destinationInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan Tujuan</label>
-              <input type="text" id="destinationInput" placeholder="Contoh: Banyumanik" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
-            </div>
-            <div>
-              <label for="weightInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Berat (Gram)</label>
-              <input type="number" id="weightInput" value="1000" min="1" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
-            </div>
-          </div>
-          <button type="submit" id="btnSubmitOngkir" class="w-full mt-2 bg-black hover:bg-zinc-800 text-white font-semibold py-4 rounded-xl transition flex items-center justify-center gap-2">
-            <span id="btnTextOngkir">Cek Tarif</span>
-            <i id="btnIconOngkir" class="fa-solid fa-arrow-right font-bold"></i>
-          </button>
-        </form>
-      </div>
-
-      <div id="resultOngkirSection" class="hidden border border-zinc-200 rounded-2xl p-6 sm:p-8 bg-white">
-        <h3 class="font-bold text-lg mb-6 tracking-tight border-b border-zinc-100 pb-4">Pilihan Tarif Pengiriman</h3>
-        <div id="ongkirResultsList" class="grid grid-cols-1 gap-4"></div>
-      </div>
-    </div>
-
     <div id="errorMessage" class="hidden mb-6 p-4 bg-zinc-50 border border-zinc-300 text-zinc-700 rounded-xl text-xs sm:text-sm text-center font-medium"></div>
   </main>
 
@@ -155,41 +107,28 @@
   </footer>
 
   <script>
-    // Fix Jam Resi Binderbyte
+    // FUNGSI MEMASTIKAN JAM PERSIS SESUAI DATA API BINDERBYTE
     function formatIndonesianDate(dateStr) {
       if (!dateStr) return '-';
+
+      // 1. Bersihkan string dari spasi berlebih
       const cleanStr = dateStr.trim();
+
+      // 2. Pisahkan angka Tanggal-Bulan-Tahun dan Jam:Menit tanpa lewat objek JavaScript Date (Mencegah pergeseran timezone)
       const parts = cleanStr.split(/[\s\-:]+/);
 
-      if (parts.length < 5) return dateStr;
+      // Jika format dari API berupa "YYYY-MM-DD HH:mm:ss"
+      if (parts.length >= 5) {
+        const [year, month, day, hour, minute] = parts;
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+        const monthLabel = monthNames[parseInt(month, 10) - 1] || month;
 
-      const [year, month, day, hour, minute] = parts;
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-      const monthLabel = monthNames[parseInt(month, 10) - 1] || month;
-
-      return `${day} ${monthLabel} ${year}, ${hour}:${minute} WIB`;
-    }
-
-    function switchTab(tab) {
-      const tabResi = document.getElementById('tabResi');
-      const tabOngkir = document.getElementById('tabOngkir');
-      const sectionResi = document.getElementById('sectionResi');
-      const sectionOngkir = document.getElementById('sectionOngkir');
-      const errorMessage = document.getElementById('errorMessage');
-
-      errorMessage.classList.add('hidden');
-
-      if (tab === 'resi') {
-        tabResi.className = "px-6 py-2.5 rounded-lg text-sm font-bold transition bg-white text-black shadow-sm";
-        tabOngkir.className = "px-6 py-2.5 rounded-lg text-sm font-bold transition text-zinc-500 hover:text-black";
-        sectionResi.classList.remove('hidden');
-        sectionOngkir.classList.add('hidden');
-      } else {
-        tabOngkir.className = "px-6 py-2.5 rounded-lg text-sm font-bold transition bg-white text-black shadow-sm";
-        tabResi.className = "px-6 py-2.5 rounded-lg text-sm font-bold transition text-zinc-500 hover:text-black";
-        sectionOngkir.classList.remove('hidden');
-        sectionResi.classList.add('hidden');
+        // Ambil nilai mentah Jam & Menit dari Binderbyte langsung
+        return `${day} ${monthLabel} ${year}, ${hour}:${minute} WIB`;
       }
+
+      // Jika format berupa string teks langsung
+      return cleanStr;
     }
 
     // Cek Resi Form Handler
@@ -269,63 +208,6 @@
         showError('Gagal menghubungkan ke layanan pengiriman. Silakan periksa koneksi internet Anda.');
       } finally {
         btnText.innerText = 'Cek Paket';
-        btnIcon.className = 'fa-solid fa-arrow-right font-bold';
-      }
-    });
-
-    // Cek Ongkir Form Handler
-    document.getElementById('ongkirForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const origin = document.getElementById('originInput').value.trim();
-      const destination = document.getElementById('destinationInput').value.trim();
-      const weight = document.getElementById('weightInput').value;
-
-      const btnText = document.getElementById('btnTextOngkir');
-      const btnIcon = document.getElementById('btnIconOngkir');
-      const resultSection = document.getElementById('resultOngkirSection');
-      const resultsList = document.getElementById('ongkirResultsList');
-      const errorMessage = document.getElementById('errorMessage');
-
-      btnText.innerText = 'Mencari Tarif...';
-      btnIcon.className = 'fa-solid fa-spinner fa-spin';
-      errorMessage.classList.add('hidden');
-      resultSection.classList.add('hidden');
-
-      try {
-        const response = await fetch(`/api/cost?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&weight=${weight}`);
-        const result = await response.json();
-
-        if (result.status === 200 && result.data && result.data.results) {
-          resultsList.innerHTML = '';
-          const services = result.data.results;
-
-          services.forEach(item => {
-            const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.price);
-            resultsList.innerHTML += `
-              <div class="border border-zinc-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-black transition">
-                <div>
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-bold uppercase tracking-wider text-black">${item.code || item.courier}</span>
-                    <span class="text-xs px-2 py-0.5 bg-zinc-100 rounded text-zinc-600 font-semibold">${item.service}</span>
-                  </div>
-                  <p class="text-xs text-zinc-500">Estimasi Tiba: <span class="font-medium text-zinc-800">${item.etd || '-'} Hari</span></p>
-                </div>
-                <div class="text-right">
-                  <div class="text-lg font-bold text-black">${formattedPrice}</div>
-                </div>
-              </div>
-            `;
-          });
-
-          resultSection.classList.remove('hidden');
-          resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          showError(result.message || 'Kota/Kecamatan asal atau tujuan tidak ditemukan.');
-        }
-      } catch (err) {
-        showError('Gagal mengambil data tarif. Periksa koneksi atau coba lagi nanti.');
-      } finally {
-        btnText.innerText = 'Cek Tarif';
         btnIcon.className = 'fa-solid fa-arrow-right font-bold';
       }
     });
