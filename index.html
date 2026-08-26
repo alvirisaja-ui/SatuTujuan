@@ -13,6 +13,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -23,17 +24,96 @@
     }
   </script>
 </head>
-<body class="bg-white text-zinc-900 font-sans min-h-screen flex flex-col antialiased relative">
+<body class="bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans min-h-screen flex flex-col antialiased relative transition-colors duration-200">
+
+  <!-- SIDEBAR OVERLAY -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <!-- SIDEBAR MENU FROM LEFT -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white dark:bg-zinc-900 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl flex flex-col border-r border-zinc-200 dark:border-zinc-800">
+    <!-- Header Sidebar -->
+    <div class="p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center rounded-lg font-bold text-lg">1</div>
+        <span class="text-xl font-bold tracking-tight text-black dark:text-white">Menu Utama</span>
+      </div>
+      <button id="closeSidebarBtn" class="w-8 h-8 text-zinc-400 hover:text-black dark:hover:text-white rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center justify-center">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Content Sidebar -->
+    <div class="flex-grow overflow-y-auto p-4 space-y-6">
+      
+      <!-- KATEGORI: PENGATURAN -->
+      <div>
+        <div class="flex items-center gap-2 px-3 mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400">
+          <i class="fa-solid fa-gear"></i>
+          <span>Pengaturan</span>
+        </div>
+        <div class="space-y-1">
+          <label class="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition">
+            <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Suara Notifikasi</span>
+            <input type="checkbox" id="settingSound" class="w-4 h-4 accent-black dark:accent-white rounded cursor-pointer">
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition">
+            <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Simpan Riwayat Otomatis</span>
+            <input type="checkbox" id="settingSaveHistory" checked class="w-4 h-4 accent-black dark:accent-white rounded cursor-pointer">
+          </label>
+          <button id="sidebarClearHistoryBtn" class="w-full text-left p-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs sm:text-sm font-semibold transition flex items-center justify-between">
+            <span>Hapus Semua Riwayat</span>
+            <i class="fa-regular fa-trash-can text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <hr class="border-zinc-200 dark:border-zinc-800">
+
+      <!-- KATEGORI: PENAMPILAN -->
+      <div>
+        <div class="flex items-center gap-2 px-3 mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400">
+          <i class="fa-solid fa-palette"></i>
+          <span>Penampilan</span>
+        </div>
+        <div class="space-y-1">
+          <label class="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-regular fa-sun text-zinc-500 w-4 text-center"></i>
+              <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Light Mode</span>
+            </div>
+            <input type="radio" name="themeRadio" value="light" class="w-4 h-4 accent-black dark:accent-white cursor-pointer">
+          </label>
+
+          <label class="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-regular fa-moon text-zinc-500 w-4 text-center"></i>
+              <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Dark Mode</span>
+            </div>
+            <input type="radio" name="themeRadio" value="dark" class="w-4 h-4 accent-black dark:accent-white cursor-pointer">
+          </label>
+
+          <label class="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-desktop text-zinc-500 w-4 text-center"></i>
+              <span class="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-200">Ikuti Mode Sistem</span>
+            </div>
+            <input type="radio" name="themeRadio" value="system" class="w-4 h-4 accent-black dark:accent-white cursor-pointer">
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </aside>
 
   <!-- MODAL POPUP BAGIKAN -->
   <div id="shareModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300">
-    <div id="shareModalContent" class="w-full sm:w-auto sm:min-w-[320px] max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full sm:translate-y-8 transition-transform duration-300 ease-out text-center mx-4 mb-0 sm:mb-0">
-      <div class="w-12 h-12 bg-zinc-100 text-black rounded-full flex items-center justify-center mx-auto mb-3">
+    <div id="shareModalContent" class="w-full sm:w-auto sm:min-w-[320px] max-w-sm bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full sm:translate-y-8 transition-transform duration-300 ease-out text-center mx-4 mb-0 sm:mb-0 border border-zinc-200 dark:border-zinc-800">
+      <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white rounded-full flex items-center justify-center mx-auto mb-3">
         <i class="fa-solid fa-check text-xl font-bold"></i>
       </div>
-      <h3 class="font-bold text-base text-black">Link Berhasil Disalin!</h3>
-      <p class="text-xs text-zinc-500 mt-1">Tautan pelacakan sudah siap dibagikan ke teman atau pembeli.</p>
-      <button id="closeModalBtn" class="mt-5 w-full bg-black text-white text-xs font-semibold py-3 rounded-xl hover:bg-zinc-800 transition">
+      <h3 class="font-bold text-base text-black dark:text-white">Link Berhasil Disalin!</h3>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Tautan pelacakan sudah siap dibagikan ke teman atau pembeli.</p>
+      <button id="closeModalBtn" class="mt-5 w-full bg-black dark:bg-white text-white dark:text-black text-xs font-semibold py-3 rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition">
         Tutup
       </button>
     </div>
@@ -41,70 +121,76 @@
 
   <!-- MODAL POPUP FAQ / BANTUAN -->
   <div id="faqModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300 p-4">
-    <div id="faqModalContent" class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[85vh]">
-      <div class="p-6 border-b border-zinc-100 flex items-center justify-between">
+    <div id="faqModalContent" class="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[85vh] border border-zinc-200 dark:border-zinc-800">
+      <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-zinc-100 text-black rounded-lg flex items-center justify-center">
+          <div class="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-circle-question text-sm"></i>
           </div>
           <div>
-            <h3 class="font-bold text-lg text-black">Pusat Bantuan & FAQ</h3>
+            <h3 class="font-bold text-lg text-black dark:text-white">Pusat Bantuan & FAQ</h3>
             <p class="text-xs text-zinc-400">Pahami arti status dan solusi kendala pengiriman Anda</p>
           </div>
         </div>
-        <button id="closeFaqBtn" class="w-8 h-8 text-zinc-400 hover:text-black rounded-full hover:bg-zinc-100 transition flex items-center justify-center">
+        <button id="closeFaqBtn" class="w-8 h-8 text-zinc-400 hover:text-black dark:hover:text-white rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center justify-center">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <div class="p-4 bg-zinc-50 border-b border-zinc-100">
+      <div class="p-4 bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-xs"></i>
-          <input type="text" id="searchFaq" placeholder="Cari istilah status (misal: Manifested, Drop Point)..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-black">
+          <input type="text" id="searchFaq" placeholder="Cari istilah status (misal: Manifested, Drop Point)..." class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-black dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
         </div>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-4 flex-grow text-xs sm:text-sm" id="faqList">
-        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
-          <h4 class="font-bold text-black text-sm mb-1">Apa arti status "Manifested" atau "Shipment Received"?</h4>
-          <p class="text-zinc-600 leading-relaxed">Paket sudah diserahkan oleh pengirim ke pihak ekspedisi dan data pengiriman telah terdaftar di sistem pusat.</p>
+        <div class="faq-item border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-900">
+          <h4 class="font-bold text-black dark:text-white text-sm mb-1">Apa arti status "Manifested" atau "Shipment Received"?</h4>
+          <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">Paket sudah diserahkan oleh pengirim ke pihak ekspedisi dan data pengiriman telah terdaftar di sistem pusat.</p>
         </div>
 
-        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
-          <h4 class="font-bold text-black text-sm mb-1">Apa arti "On Process" / "In Transit"?</h4>
-          <p class="text-zinc-600 leading-relaxed">Paket sedang dalam perjalanan darat/udara antar kota/hub transit ekspedisi menuju kota tujuan.</p>
+        <div class="faq-item border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-900">
+          <h4 class="font-bold text-black dark:text-white text-sm mb-1">Apa arti "On Process" / "In Transit"?</h4>
+          <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">Paket sedang dalam perjalanan darat/udara antar kota/hub transit ekspedisi menuju kota tujuan.</p>
         </div>
 
-        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
-          <h4 class="font-bold text-black text-sm mb-1">Apa arti "With Courier" / "Sedang Diantar"?</h4>
-          <p class="text-zinc-600 leading-relaxed">Paket sudah tiba di agen/hub tujuan terdekat dan saat ini dibawa oleh kurir menuju alamat rumah Anda.</p>
+        <div class="faq-item border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-900">
+          <h4 class="font-bold text-black dark:text-white text-sm mb-1">Apa arti "With Courier" / "Sedang Diantar"?</h4>
+          <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">Paket sudah tiba di agen/hub tujuan terdekat dan saat ini dibawa oleh kurir menuju alamat rumah Anda.</p>
         </div>
 
-        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
-          <h4 class="font-bold text-black text-sm mb-1">Apa yang harus dilakukan jika resi "Tidak Ditemukan"?</h4>
-          <p class="text-zinc-600 leading-relaxed">Pastikan pilihan nama kurir sudah sesuai dan nomor resi tidak ada salah ketik. Resi baru umumnya membutuhkan waktu 1-3 jam untuk terupdate di server ekspedisi.</p>
+        <div class="faq-item border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-900">
+          <h4 class="font-bold text-black dark:text-white text-sm mb-1">Apa yang harus dilakukan jika resi "Tidak Ditemukan"?</h4>
+          <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">Pastikan pilihan nama kurir sudah sesuai dan nomor resi tidak ada salah ketik. Resi baru umumnya membutuhkan waktu 1-3 jam untuk terupdate di server ekspedisi.</p>
         </div>
 
-        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
-          <h4 class="font-bold text-black text-sm mb-1">Apakah data di SatuTujuan terupdate secara real-time?</h4>
-          <p class="text-zinc-600 leading-relaxed">Ya, data status pelacakan diambil secara langsung (real-time) dari server resmi masing-masing penyedia layanan kurir.</p>
+        <div class="faq-item border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-900">
+          <h4 class="font-bold text-black dark:text-white text-sm mb-1">Apakah data di SatuTujuan terupdate secara real-time?</h4>
+          <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">Ya, data status pelacakan diambil secara langsung (real-time) dari server resmi masing-masing penyedia layanan kurir.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-40">
+  <header class="border-b border-zinc-200 dark:border-zinc-800 py-5 bg-white dark:bg-zinc-950 sticky top-0 z-40 transition-colors duration-200">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
-      <a href="/" class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-lg">1</div>
-        <span class="text-xl font-bold tracking-tight text-black">SatuTujuan</span>
-      </a>
       <div class="flex items-center gap-3">
-        <button id="openFaqBtn" class="text-xs font-semibold text-zinc-600 hover:text-black transition flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 hover:border-black rounded-full">
+        <!-- TOMBOL GARIS 3 (HAMBURGER MENU) IN KIRI ATAS -->
+        <button id="openSidebarBtn" class="w-9 h-9 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white rounded-xl flex items-center justify-center text-zinc-700 dark:text-zinc-200 hover:text-black dark:hover:text-white transition">
+          <i class="fa-solid fa-bars text-base"></i>
+        </button>
+        <a href="/" class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center rounded-lg font-bold text-lg">1</div>
+          <span class="text-xl font-bold tracking-tight text-black dark:text-white">SatuTujuan</span>
+        </a>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="openFaqBtn" class="text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white transition flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white rounded-full">
           <i class="fa-regular fa-circle-question"></i>
           <span>Bantuan</span>
         </button>
-        <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full hidden sm:inline-block">Lacak Paket</span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-3 py-1 rounded-full hidden sm:inline-block">Lacak Paket</span>
       </div>
     </div>
   </header>
@@ -113,37 +199,37 @@
     
     <div id="sectionResi">
       <div class="text-center mb-8">
-        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Lacak Pengiriman Anda</h1>
-        <p class="text-zinc-500 text-sm sm:text-base">Masukkan nomor resi dan pilih kurir untuk melihat status paket secara akurat.</p>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-black dark:text-white">Lacak Pengiriman Anda</h1>
+        <p class="text-zinc-500 dark:text-zinc-400 text-sm sm:text-base">Masukkan nomor resi dan pilih kurir untuk melihat status paket secara akurat.</p>
       </div>
 
-      <!-- STATISTIK KEUNGGULAN (DIPINDAHKAN KE ATAS FORMULIR) -->
+      <!-- STATISTIK KEUNGGULAN (DI ATAS FORMULIR) -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-200/60 text-center">
-          <p class="text-xl sm:text-2xl font-bold text-black">10.000.000+</p>
-          <p class="text-xs text-zinc-500 mt-0.5">Paket Terlacak</p>
+        <div class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-center">
+          <p class="text-xl sm:text-2xl font-bold text-black dark:text-white">10.000.000+</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Paket Terlacak</p>
         </div>
-        <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-200/60 text-center">
-          <p class="text-xl sm:text-2xl font-bold text-black">99.9%</p>
-          <p class="text-xs text-zinc-500 mt-0.5">Akurat & Terpercaya</p>
+        <div class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-center">
+          <p class="text-xl sm:text-2xl font-bold text-black dark:text-white">99.9%</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Akurat & Terpercaya</p>
         </div>
-        <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-200/60 text-center">
-          <p class="text-xl sm:text-2xl font-bold text-black">Real-time</p>
-          <p class="text-xs text-zinc-500 mt-0.5">Pembaruan Otomatis</p>
+        <div class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-center">
+          <p class="text-xl sm:text-2xl font-bold text-black dark:text-white">Real-time</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Pembaruan Otomatis</p>
         </div>
       </div>
 
       <!-- FORMULIR PENCARIAN -->
-      <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-sm mb-8 transition-colors duration-200">
         <form id="trackingForm" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
-              <label for="resiInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Nomor Resi</label>
-              <input type="text" id="resiInput" placeholder="Contoh: JNT123456789" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
+              <label for="resiInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Nomor Resi</label>
+              <input type="text" id="resiInput" placeholder="Contoh: JNT123456789" required class="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition">
             </div>
             <div>
-              <label for="courierSelect" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kurir / Ekspedisi</label>
-              <select id="courierSelect" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
+              <label for="courierSelect" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Kurir / Ekspedisi</label>
+              <select id="courierSelect" required class="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition">
                 <option value="" disabled selected>Pilih Kurir</option>
                 <option value="jne">JNE Express</option>
                 <option value="jnt">J&T Express</option>
@@ -158,7 +244,7 @@
               </select>
             </div>
           </div>
-          <button type="submit" id="btnSubmitResi" class="w-full mt-2 bg-black hover:bg-zinc-800 text-white font-semibold py-4 rounded-xl transition flex items-center justify-center gap-2">
+          <button type="submit" id="btnSubmitResi" class="w-full mt-2 bg-black dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-black font-semibold py-4 rounded-xl transition flex items-center justify-center gap-2">
             <span id="btnTextResi">Cek Paket</span>
             <i id="btnIconResi" class="fa-solid fa-arrow-right font-bold"></i>
           </button>
@@ -176,18 +262,18 @@
 
       <!-- Hasil Pelacakan Paket -->
       <div id="resultResiSection" class="hidden space-y-6">
-        <div class="border border-zinc-200 rounded-2xl p-6 bg-zinc-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div class="border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 bg-zinc-50 dark:bg-zinc-900 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
             <div class="flex items-center gap-2 mb-2">
-              <span id="courierBadge" class="text-xs font-bold uppercase tracking-wider bg-black text-white px-2.5 py-0.5 rounded-md"></span>
-              <span class="text-zinc-300">•</span>
-              <span id="displayResi" class="text-xs font-mono font-medium text-zinc-700"></span>
+              <span id="courierBadge" class="text-xs font-bold uppercase tracking-wider bg-black dark:bg-white text-white dark:text-black px-2.5 py-0.5 rounded-md"></span>
+              <span class="text-zinc-300 dark:text-zinc-700">•</span>
+              <span id="displayResi" class="text-xs font-mono font-medium text-zinc-700 dark:text-zinc-300"></span>
             </div>
-            <h2 class="text-xl font-bold text-black" id="displayStatusTitle"></h2>
-            <p id="displayRoute" class="text-xs text-zinc-500 mt-1"></p>
+            <h2 class="text-xl font-bold text-black dark:text-white" id="displayStatusTitle"></h2>
+            <p id="displayRoute" class="text-xs text-zinc-500 dark:text-zinc-400 mt-1"></p>
           </div>
           <div class="flex items-center gap-3">
-            <button id="shareBtn" title="Salin Tautan Resi" class="p-2.5 bg-white border border-zinc-200 hover:border-black rounded-xl text-zinc-700 hover:text-black transition flex items-center gap-2 text-xs font-semibold">
+            <button id="shareBtn" title="Salin Tautan Resi" class="p-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-black dark:hover:border-white rounded-xl text-zinc-700 dark:text-zinc-200 transition flex items-center gap-2 text-xs font-semibold">
               <i class="fa-solid fa-share-nodes"></i>
               <span>Bagikan</span>
             </button>
@@ -195,24 +281,106 @@
           </div>
         </div>
 
-        <div class="border border-zinc-200 rounded-2xl p-6 sm:p-8 bg-white">
-          <h3 class="font-bold text-lg mb-6 tracking-tight border-b border-zinc-100 pb-4">Riwayat Perjalanan Paket</h3>
-          <div id="timelineContainer" class="relative border-l-2 border-zinc-200 ml-4 space-y-8"></div>
+        <div class="border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 bg-white dark:bg-zinc-900">
+          <h3 class="font-bold text-lg mb-6 tracking-tight border-b border-zinc-100 dark:border-zinc-800 pb-4 text-black dark:text-white">Riwayat Perjalanan Paket</h3>
+          <div id="timelineContainer" class="relative border-l-2 border-zinc-200 dark:border-zinc-800 ml-4 space-y-8"></div>
         </div>
       </div>
     </div>
 
-    <div id="errorMessage" class="hidden mb-6 p-4 bg-zinc-50 border border-zinc-300 text-zinc-700 rounded-xl text-xs sm:text-sm text-center font-medium"></div>
+    <div id="errorMessage" class="hidden mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs sm:text-sm text-center font-medium"></div>
   </main>
 
-  <footer class="border-t border-zinc-200 py-6 bg-white text-center text-xs text-zinc-400">
+  <footer class="border-t border-zinc-200 dark:border-zinc-800 py-6 bg-white dark:bg-zinc-950 text-center text-xs text-zinc-400 transition-colors duration-200">
     <div class="max-w-4xl mx-auto px-4">
-      &copy; 2026 <span class="font-semibold text-zinc-700">SatuTujuan</span>. Seluruh hak cipta dilindungi.
+      &copy; 2026 <span class="font-semibold text-zinc-700 dark:text-zinc-300">SatuTujuan</span>. Seluruh hak cipta dilindungi.
     </div>
   </footer>
 
   <script>
     const RECENT_KEY = 'satutujuan_recent_searches';
+    const THEME_KEY = 'satutujuan_theme_preference';
+    const SOUND_KEY = 'satutujuan_setting_sound';
+    const SAVE_HISTORY_KEY = 'satutujuan_setting_save_history';
+
+    // INTEGRASI MANAJEMEN TEMA (LIGHT, DARK, SYSTEM)
+    const themeRadios = document.querySelectorAll('input[name="themeRadio"]');
+    
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    }
+
+    function setThemePreference(theme) {
+      localStorage.setItem(THEME_KEY, theme);
+      applyTheme(theme);
+    }
+
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'system';
+    applyTheme(savedTheme);
+
+    themeRadios.forEach(radio => {
+      if (radio.value === savedTheme) radio.checked = true;
+      radio.addEventListener('change', (e) => {
+        setThemePreference(e.target.value);
+      });
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if ((localStorage.getItem(THEME_KEY) || 'system') === 'system') {
+        applyTheme('system');
+      }
+    });
+
+    // PENGATURAN SUARA & RIWAYAT
+    const settingSound = document.getElementById('settingSound');
+    const settingSaveHistory = document.getElementById('settingSaveHistory');
+
+    settingSound.checked = localStorage.getItem(SOUND_KEY) === 'true';
+    settingSaveHistory.checked = localStorage.getItem(SAVE_HISTORY_KEY) !== 'false';
+
+    settingSound.addEventListener('change', (e) => {
+      localStorage.setItem(SOUND_KEY, e.target.checked);
+    });
+
+    settingSaveHistory.addEventListener('change', (e) => {
+      localStorage.setItem(SAVE_HISTORY_KEY, e.target.checked);
+    });
+
+    // SIDEBAR CONTROL
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const openSidebarBtn = document.getElementById('openSidebarBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarOverlay.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarOverlay.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    openSidebarBtn.addEventListener('click', openSidebar);
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.getElementById('sidebarClearHistoryBtn').addEventListener('click', () => {
+      localStorage.removeItem(RECENT_KEY);
+      renderRecent();
+      closeSidebar();
+    });
 
     // KONVERSI WAKTU ZONA LOKAL USER (WIB / WITA / WIT)
     function parseAndFormatDate(dateStr) {
@@ -338,6 +506,7 @@
 
     // LOCALSTORAGE RIWAYAT PENCARIAN
     function saveToRecent(courier, resi) {
+      if (localStorage.getItem(SAVE_HISTORY_KEY) === 'false') return;
       let recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
       recent = recent.filter(item => !(item.courier === courier && item.resi === resi));
       recent.unshift({ courier, resi });
@@ -359,8 +528,8 @@
       container.innerHTML = '';
       recent.forEach(item => {
         const btn = document.createElement('button');
-        btn.className = 'px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-zinc-700 text-xs font-semibold rounded-lg transition flex items-center gap-1.5';
-        btn.innerHTML = `<span class="uppercase text-[10px] bg-zinc-300 text-zinc-800 px-1.5 py-0.5 rounded">${item.courier}</span> ${item.resi}`;
+        btn.className = 'px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-semibold rounded-lg transition flex items-center gap-1.5';
+        btn.innerHTML = `<span class="uppercase text-[10px] bg-zinc-300 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-1.5 py-0.5 rounded">${item.courier}</span> ${item.resi}`;
         btn.onclick = () => {
           document.getElementById('courierSelect').value = item.courier;
           document.getElementById('resiInput').value = item.resi;
@@ -429,11 +598,11 @@
           const statusTitle = document.getElementById('displayStatusTitle');
           
           if (isDelivered) {
-            badge.className = "inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border bg-black text-white border-black";
+            badge.className = "inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white";
             badge.innerText = "DELIVERED";
             statusTitle.innerText = "Paket Telah Diterima";
           } else {
-            badge.className = "inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border border-zinc-300 bg-zinc-100 text-zinc-800";
+            badge.className = "inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200";
             badge.innerText = (summary.status || 'PROSES').toUpperCase();
             statusTitle.innerText = "Paket Dalam Perjalanan";
           }
@@ -444,17 +613,17 @@
           if (historyData.length > 0) {
             historyData.forEach((item, index) => {
               const isLatest = index === 0;
-              const dotClass = isLatest ? 'bg-black ring-4 ring-white' : 'bg-zinc-300 ring-4 ring-white';
+              const dotClass = isLatest ? 'bg-black dark:bg-white ring-4 ring-white dark:ring-zinc-900' : 'bg-zinc-300 dark:bg-zinc-700 ring-4 ring-white dark:ring-zinc-900';
               const iconClass = isLatest ? (isDelivered ? 'fa-check' : 'fa-truck') : '';
               
               timeline.innerHTML += `
                 <div class="mb-8 ml-6">
                   <span class="absolute -left-2.5 flex items-center justify-center w-5 h-5 ${dotClass} rounded-full">
-                    ${iconClass ? `<i class="fa-solid ${iconClass} text-[9px] text-white"></i>` : ''}
+                    ${iconClass ? `<i class="fa-solid ${iconClass} text-[9px] text-white dark:text-black"></i>` : ''}
                   </span>
-                  <time class="block mb-1 text-xs font-semibold text-zinc-500">${parseAndFormatDate(item.date)}</time>
-                  <h4 class="text-sm ${isLatest ? 'font-bold text-black' : 'font-semibold text-zinc-800'}">${item.desc || ''}</h4>
-                  <p class="text-xs text-zinc-500 mt-1">Lokasi: ${item.location || 'Sistem Hub'}</p>
+                  <time class="block mb-1 text-xs font-semibold text-zinc-500 dark:text-zinc-400">${parseAndFormatDate(item.date)}</time>
+                  <h4 class="text-sm ${isLatest ? 'font-bold text-black dark:text-white' : 'font-semibold text-zinc-800 dark:text-zinc-200'}">${item.desc || ''}</h4>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Lokasi: ${item.location || 'Sistem Hub'}</p>
                 </div>
               `;
             });
