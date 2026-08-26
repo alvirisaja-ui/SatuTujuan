@@ -106,23 +106,37 @@
   </footer>
 
   <script>
-    // FUNGSI KONVERSI WAKTU PERSIS ZONA LOKAL
+    // KONVERSI OTOMATIS UTC+0 KEPADA WIB (+7 JAM)
     function parseAndFormatDate(dateStr) {
       if (!dateStr) return '-';
 
       const cleanStr = String(dateStr).trim();
-
-      // Ekstrak komponen tanggal dan jam menggunakan Regex
-      // Format Binderbyte standar: YYYY-MM-DD HH:mm:ss
-      const match = cleanStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+      const match = cleanStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})\s+(\d{1,2}):(\d{1,2})/);
 
       if (match) {
-        const [, year, month, day, hour, minute] = match;
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-        const monthLabel = monthNames[parseInt(month, 10) - 1] || month;
+        let [, year, month, day, hour, minute] = match;
+        
+        let y = parseInt(year, 10);
+        let mon = parseInt(month, 10) - 1;
+        let d = parseInt(day, 10);
+        let h = parseInt(hour, 10);
+        let m = parseInt(minute, 10);
 
-        // Tampilkan langsung format angka asli tanpa pengolahan Date Javascript
-        return `${parseInt(day, 10)} ${monthLabel} ${year}, ${hour.padStart(2, '0')}:${minute.padStart(2, '0')} WIB`;
+        // Anggap string input sebagai waktu UTC 0, lalu konversi ke WIB (+7 Jam)
+        const dateObj = new Date(Date.UTC(y, mon, d, h, m));
+        
+        // Tambahkan 7 jam secara manual untuk WIB
+        dateObj.setUTCHours(dateObj.getUTCHours() + 7);
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+        
+        const formattedDay = String(dateObj.getUTCDate()).padStart(2, '0');
+        const formattedMonth = monthNames[dateObj.getUTCMonth()];
+        const formattedYear = dateObj.getUTCFullYear();
+        const formattedHour = String(dateObj.getUTCHours()).padStart(2, '0');
+        const formattedMinute = String(dateObj.getUTCMinutes()).padStart(2, '0');
+
+        return `${formattedDay} ${formattedMonth} ${formattedYear}, ${formattedHour}:${formattedMinute} WIB`;
       }
 
       return cleanStr;
