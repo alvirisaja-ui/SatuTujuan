@@ -120,12 +120,12 @@
         <form id="ongkirForm" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label for="originInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan / Kota Asal</label>
-              <input type="text" id="originInput" placeholder="Ketik nama kecamatan..." required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
+              <label for="originInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan Asal</label>
+              <input type="text" id="originInput" placeholder="Contoh: Kebayoran Baru" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
             </div>
             <div>
-              <label for="destinationInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan / Kota Tujuan</label>
-              <input type="text" id="destinationInput" placeholder="Ketik nama kecamatan..." required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
+              <label for="destinationInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan Tujuan</label>
+              <input type="text" id="destinationInput" placeholder="Contoh: Coblong" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
             </div>
             <div>
               <label for="weightInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Berat (Gram)</label>
@@ -155,22 +155,17 @@
   </footer>
 
   <script>
-    // Konversi Waktu ke WIB / Jam Lokal Indonesia
+    // Parsing Tanggal Manual dari String Binderbyte ke WIB
     function formatIndonesianDate(dateStr) {
       if (!dateStr) return '';
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return dateStr;
+      const parts = dateStr.trim().split(/[\s\-:]+/);
+      if (parts.length < 5) return dateStr;
 
-      const formatted = new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).format(date);
+      const [year, month, day, hour, minute] = parts;
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+      const monthLabel = monthNames[parseInt(month, 10) - 1] || month;
 
-      return formatted.replace('.', ':') + ' WIB';
+      return `${day} ${monthLabel} ${year}, ${hour}:${minute} WIB`;
     }
 
     function switchTab(tab) {
@@ -323,7 +318,7 @@
           resultSection.classList.remove('hidden');
           resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
-          showError(result.message || 'Kota asal atau tujuan tidak ditemukan. Cobalah gunakan nama kecamatan.');
+          showError(result.message || 'Kota/Kecamatan asal atau tujuan tidak ditemukan.');
         }
       } catch (err) {
         showError('Gagal mengambil data tarif. Periksa koneksi atau coba lagi nanti.');
