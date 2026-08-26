@@ -39,13 +39,73 @@
     </div>
   </div>
 
+  <!-- MODAL POPUP FAQ / BANTUAN -->
+  <div id="faqModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+    <div id="faqModalContent" class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[85vh]">
+      <div class="p-6 border-b border-zinc-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-zinc-100 text-black rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-circle-question text-sm"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-black">Pusat Bantuan & FAQ</h3>
+            <p class="text-xs text-zinc-400">Pahami arti status dan solusi kendala pengiriman Anda</p>
+          </div>
+        </div>
+        <button id="closeFaqBtn" class="w-8 h-8 text-zinc-400 hover:text-black rounded-full hover:bg-zinc-100 transition flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-4 bg-zinc-50 border-b border-zinc-100">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 text-xs"></i>
+          <input type="text" id="searchFaq" placeholder="Cari istilah status (misal: Manifested, Drop Point)..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-black">
+        </div>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 flex-grow text-xs sm:text-sm" id="faqList">
+        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
+          <h4 class="font-bold text-black text-sm mb-1">Apa arti status "Manifested" atau "Shipment Received"?</h4>
+          <p class="text-zinc-600 leading-relaxed">Paket sudah diserahkan oleh pengirim ke pihak ekspedisi dan data pengiriman telah terdaftar di sistem pusat.</p>
+        </div>
+
+        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
+          <h4 class="font-bold text-black text-sm mb-1">Apa arti "On Process" / "In Transit"?</h4>
+          <p class="text-zinc-600 leading-relaxed">Paket sedang dalam perjalanan darat/udara antar kota/hub transit ekspedisi menuju kota tujuan.</p>
+        </div>
+
+        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
+          <h4 class="font-bold text-black text-sm mb-1">Apa arti "With Courier" / "Sedang Diantar"?</h4>
+          <p class="text-zinc-600 leading-relaxed">Paket sudah tiba di agen/hub tujuan terdekat dan saat ini dibawa oleh kurir menuju alamat rumah Anda.</p>
+        </div>
+
+        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
+          <h4 class="font-bold text-black text-sm mb-1">Apa yang harus dilakukan jika resi "Tidak Ditemukan"?</h4>
+          <p class="text-zinc-600 leading-relaxed">Pastikan pilihan nama kurir sudah sesuai dan nomor resi tidak ada salah ketik. Resi baru umumnya membutuhkan waktu 1-3 jam untuk terupdate di server ekspedisi.</p>
+        </div>
+
+        <div class="faq-item border border-zinc-200 rounded-xl p-4 bg-white">
+          <h4 class="font-bold text-black text-sm mb-1">Apakah data di SatuTujuan terupdate secara real-time?</h4>
+          <p class="text-zinc-600 leading-relaxed">Ya, data status pelacakan diambil secara langsung (real-time) dari server resmi masing-masing penyedia layanan kurir.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <header class="border-b border-zinc-200 py-5 bg-white sticky top-0 z-40">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <a href="/" class="flex items-center gap-2">
         <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-lg">1</div>
         <span class="text-xl font-bold tracking-tight text-black">SatuTujuan</span>
       </a>
-      <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full">Lacak Paket</span>
+      <div class="flex items-center gap-3">
+        <button id="openFaqBtn" class="text-xs font-semibold text-zinc-600 hover:text-black transition flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 hover:border-black rounded-full">
+          <i class="fa-regular fa-circle-question"></i>
+          <span>Bantuan</span>
+        </button>
+        <span class="text-xs font-semibold uppercase tracking-widest text-zinc-400 border border-zinc-200 px-3 py-1 rounded-full hidden sm:inline-block">Lacak Paket</span>
+      </div>
     </div>
   </header>
 
@@ -137,7 +197,7 @@
   <script>
     const RECENT_KEY = 'satutujuan_recent_searches';
 
-    // FUNGSI KONVERSI WAKTU ZONA LOKAL USER (WIB / WITA / WIT)
+    // KONVERSI WAKTU ZONA LOKAL USER (WIB / WITA / WIT)
     function parseAndFormatDate(dateStr) {
       if (!dateStr) return '-';
 
@@ -184,7 +244,7 @@
       return cleanStr;
     }
 
-    // POPUP MODAL CONTROL
+    // MODAL BAGIKAN CONTROL
     const shareModal = document.getElementById('shareModal');
     const shareModalContent = document.getElementById('shareModalContent');
     const closeModalBtn = document.getElementById('closeModalBtn');
@@ -204,6 +264,44 @@
     closeModalBtn.addEventListener('click', closeModal);
     shareModal.addEventListener('click', (e) => {
       if (e.target === shareModal) closeModal();
+    });
+
+    // MODAL FAQ / BANTUAN CONTROL
+    const faqModal = document.getElementById('faqModal');
+    const faqModalContent = document.getElementById('faqModalContent');
+    const openFaqBtn = document.getElementById('openFaqBtn');
+    const closeFaqBtn = document.getElementById('closeFaqBtn');
+    const searchFaq = document.getElementById('searchFaq');
+
+    openFaqBtn.addEventListener('click', () => {
+      faqModal.classList.remove('opacity-0', 'pointer-events-none');
+      faqModalContent.classList.remove('scale-95');
+      faqModalContent.classList.add('scale-100');
+    });
+
+    function closeFaq() {
+      faqModalContent.classList.remove('scale-100');
+      faqModalContent.classList.add('scale-95');
+      faqModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    closeFaqBtn.addEventListener('click', closeFaq);
+    faqModal.addEventListener('click', (e) => {
+      if (e.target === faqModal) closeFaq();
+    });
+
+    // PENCARIAN DI FAQ
+    searchFaq.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const items = document.querySelectorAll('.faq-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(query)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
     });
 
     // LOCALSTORAGE RIWAYAT PENCARIAN
@@ -345,7 +443,7 @@
       }
     }
 
-    // SALIN LINK & TAMPILKAN POPUP
+    // SALIN LINK
     document.getElementById('shareBtn').addEventListener('click', () => {
       if (navigator.clipboard) {
         navigator.clipboard.writeText(window.location.href).then(() => {
