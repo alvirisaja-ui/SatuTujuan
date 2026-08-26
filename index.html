@@ -106,12 +106,12 @@
   </footer>
 
   <script>
-    // KONVERSI OTOMATIS UTC+0 KEPADA WIB (+7 JAM)
+    // FUNGSI OTOMATIS MENYESUAIKAN ZONA WAKTU USER (WIB / WITA / WIT)
     function parseAndFormatDate(dateStr) {
       if (!dateStr) return '-';
 
       const cleanStr = String(dateStr).trim();
-      const match = cleanStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})\s+(\d{1,2}):(\d{1,2})/);
+      const match = cleanStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
 
       if (match) {
         let [, year, month, day, hour, minute] = match;
@@ -122,21 +122,35 @@
         let h = parseInt(hour, 10);
         let m = parseInt(minute, 10);
 
-        // Anggap string input sebagai waktu UTC 0, lalu konversi ke WIB (+7 Jam)
-        const dateObj = new Date(Date.UTC(y, mon, d, h, m));
-        
-        // Tambahkan 7 jam secara manual untuk WIB
-        dateObj.setUTCHours(dateObj.getUTCHours() + 7);
+        // Objek tanggal UTC murni dari API
+        const utcDate = new Date(Date.UTC(y, mon, d, h, m));
 
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-        
-        const formattedDay = String(dateObj.getUTCDate()).padStart(2, '0');
-        const formattedMonth = monthNames[dateObj.getUTCMonth()];
-        const formattedYear = dateObj.getUTCFullYear();
-        const formattedHour = String(dateObj.getUTCHours()).padStart(2, '0');
-        const formattedMinute = String(dateObj.getUTCMinutes()).padStart(2, '0');
+        // Format waktu otomatis mengikuti perangkat user
+        const formatter = new Intl.DateTimeFormat('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
 
-        return `${formattedDay} ${formattedMonth} ${formattedYear}, ${formattedHour}:${formattedMinute} WIB`;
+        const parts = formatter.formatToParts(utcDate);
+        const dateMap = {};
+        parts.forEach(p => { dateMap[p.type] = p.value; });
+
+        // Deteksi zona waktu pengguna (WIB / WITA / WIT)
+        const timeZoneOffset = -new Date().getTimezoneOffset() / 60;
+        let tzLabel = 'WIB';
+        if (timeZoneOffset === 8) {
+          tzLabel = 'WITA';
+        } else if (timeZoneOffset === 9) {
+          tzLabel = 'WIT';
+        } else if (timeZoneOffset !== 7) {
+          tzLabel = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+
+        return `${dateMap.day} ${dateMap.month} ${dateMap.year}, ${dateMap.hour}:${dateMap.minute} ${tzLabel}`;
       }
 
       return cleanStr;
