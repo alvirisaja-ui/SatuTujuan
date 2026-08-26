@@ -47,7 +47,7 @@
       <p class="text-zinc-500 text-sm sm:text-base">Masukkan nomor resi dan pilih kurir untuk melihat status paket secara akurat.</p>
     </div>
 
-    <!-- Trust Badges / Social Proof -->
+    <!-- Trust Badges -->
     <div class="grid grid-cols-3 gap-3 max-w-2xl mx-auto mb-8 text-center border-y border-zinc-100 py-4">
       <div>
         <div class="text-lg sm:text-xl font-bold text-black">1.000.000+</div>
@@ -113,7 +113,7 @@
       </form>
     </div>
 
-    <!-- Pesan Kesalahan Terpisah (User Friendly) -->
+    <!-- Error State -->
     <div id="errorMessage" class="hidden mb-6 p-4 bg-zinc-50 border border-zinc-300 text-zinc-700 rounded-xl text-xs sm:text-sm text-center font-medium">
     </div>
 
@@ -178,22 +178,24 @@
       resultSection.classList.add('hidden');
 
       try {
-        const directApiUrl = `https://api.binderbyte.com/v1/track?api_key=${API_KEY}&courier=${courier}&awb=${resi}`;
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(directApiUrl)}`;
+        // Tembak langsung ke API Binderbyte tanpa Proxy
+        const apiUrl = `https://api.binderbyte.com/v1/track?api_key=${API_KEY}&courier=${courier}&awb=${resi}`;
 
-        const response = await fetch(proxyUrl);
+        const response = await fetch(apiUrl);
         const result = await response.json();
 
-        if (result.status === 200) {
+        // 200 artinya API Binderbyte berhasil menemukan data resi
+        if (result.status === 200 && result.data) {
           const data = result.data;
-          const summary = data.summary;
-          const history = data.history;
+          const summary = data.summary || {};
+          const history = data.history || [];
 
-          document.getElementById('displayResi').innerText = summary.awb;
-          document.getElementById('displayCourier').innerText = summary.courier;
+          document.getElementById('displayResi').innerText = summary.awb || resi;
+          document.getElementById('displayCourier').innerText = summary.courier || courier;
           document.getElementById('displayRoute').innerText = `Pengirim: ${summary.origin || '-'} ➔ Penerima: ${summary.destination || '-'}`;
 
-          const isDelivered = summary.status.toLowerCase().includes('delivered') || summary.status.toLowerCase().includes('diterima');
+          const statusText = (summary.status || '').toLowerCase();
+          const isDelivered = statusText.includes('delivered') || statusText.includes('diterima');
           
           const badge = document.getElementById('statusBadge');
           const statusTitle = document.getElementById('displayStatusTitle');
@@ -204,40 +206,45 @@
             statusTitle.innerText = "Paket Telah Diterima";
           } else {
             badge.className = "inline-flex items-center px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase border border-zinc-300 bg-zinc-100 text-zinc-800";
-            badge.innerText = summary.status.toUpperCase();
+            badge.innerText = (summary.status || 'PROSES').toUpperCase();
             statusTitle.innerText = "Paket Dalam Perjalanan";
           }
 
           const timeline = document.getElementById('timelineContainer');
           timeline.innerHTML = '';
 
-          history.forEach((item, index) => {
-            const isLatest = index === 0;
-            const dotClass = isLatest ? 'bg-black ring-4 ring-white' : 'bg-zinc-300 ring-4 ring-white';
-            const iconClass = isLatest ? (isDelivered ? 'fa-check' : 'fa-truck') : '';
-            
-            const timelineItem = `
-              <div class="mb-8 ml-6">
-                <span class="absolute -left-2.5 flex items-center justify-center w-5 h-5 ${dotClass} rounded-full">
-                  ${iconClass ? `<i class="fa-solid ${iconClass} text-[9px] text-white"></i>` : ''}
-                </span>
-                <time class="block mb-1 text-xs font-medium text-zinc-400">${item.date}</time>
-                <h4 class="text-sm ${isLatest ? 'font-bold text-black' : 'font-semibold text-zinc-800'}">${item.desc}</h4>
-                <p class="text-xs text-zinc-500 mt-1">Lokasi: ${item.location || 'Sistem Hub'}</p>
-              </div>
-            `;
-            timeline.innerHTML += timelineItem;
-          });
+          if (history.length > 0) {
+            history.forEach((item, index) => {
+              const isLatest = index === 0;
+              const dotClass = isLatest ? 'bg-black ring-4 ring-white' : 'bg-zinc-300 ring-4 ring-white';
+              const iconClass = isLatest ? (isDelivered ? 'fa-check' : 'fa-truck') : '';
+              
+              const timelineItem = `
+                <div class="mb-8 ml-6">
+                  <span class="absolute -left-2.5 flex items-center justify-center w-5 h-5 ${dotClass} rounded-full">
+                    ${iconClass ? `<i class="fa-solid ${iconClass} text-[9px] text-white"></i>` : ''}
+                  </span>
+                  <time class="block mb-1 text-xs font-medium text-zinc-400">${item.date || ''}</time>
+                  <h4 class="text-sm ${isLatest ? 'font-bold text-black' : 'font-semibold text-zinc-800'}">${item.desc || ''}</h4>
+                  <p class="text-xs text-zinc-500 mt-1">Lokasi: ${item.location || 'Sistem Hub'}</p>
+                </div>
+              `;
+              timeline.innerHTML += timelineItem;
+            });
+          } else {
+            timeline.innerHTML = '<p class="text-xs text-zinc-400">Belum ada riwayat perjalanan rinci.</p>';
+          }
 
           resultSection.classList.remove('hidden');
           resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         } else {
-          showError('Nomor resi tidak ditemukan. Mohon periksa kembali nomor resi dan pilihan kurir Anda.');
+          // Jika Binderbyte mengembalikan pesan kesalahan (resinya emang salah/tidak terdeteksi)
+          showError(result.message || 'Nomor resi tidak ditemukan. Mohon periksa kembali nomor resi dan pilihan kurir Anda.');
         }
 
       } catch (err) {
-        showError('Maaf, sistem sedang memproses terlalu banyak permintaan. Silakan coba beberapa saat lagi.');
+        showError('Gagal menghubungkan ke layanan pengiriman. Silakan periksa koneksi internet Anda atau coba beberapa saat lagi.');
       } finally {
         btnText.innerText = 'Cek Paket';
         btnIcon.className = 'fa-solid fa-arrow-right font-bold';
