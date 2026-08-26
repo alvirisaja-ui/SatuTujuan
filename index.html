@@ -121,11 +121,11 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label for="originInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan Asal</label>
-              <input type="text" id="originInput" placeholder="Contoh: Kebayoran Baru" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
+              <input type="text" id="originInput" placeholder="Contoh: Coblong" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
             </div>
             <div>
               <label for="destinationInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Kecamatan Tujuan</label>
-              <input type="text" id="destinationInput" placeholder="Contoh: Coblong" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
+              <input type="text" id="destinationInput" placeholder="Contoh: Banyumanik" required class="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-300 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition">
             </div>
             <div>
               <label for="weightInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Berat (Gram)</label>
@@ -155,10 +155,12 @@
   </footer>
 
   <script>
-    // Parsing Tanggal Manual dari String Binderbyte ke WIB
+    // Fix Jam Resi Binderbyte
     function formatIndonesianDate(dateStr) {
-      if (!dateStr) return '';
-      const parts = dateStr.trim().split(/[\s\-:]+/);
+      if (!dateStr) return '-';
+      const cleanStr = dateStr.trim();
+      const parts = cleanStr.split(/[\s\-:]+/);
+
       if (parts.length < 5) return dateStr;
 
       const [year, month, day, hour, minute] = parts;
@@ -190,7 +192,7 @@
       }
     }
 
-    // Handlers Cek Resi
+    // Cek Resi Form Handler
     document.getElementById('trackingForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const resi = document.getElementById('resiInput').value.trim();
@@ -271,7 +273,7 @@
       }
     });
 
-    // Handlers Cek Ongkir
+    // Cek Ongkir Form Handler
     document.getElementById('ongkirForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const origin = document.getElementById('originInput').value.trim();
